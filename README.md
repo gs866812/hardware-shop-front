@@ -3,12 +3,12 @@
 ### Live link https://app.gsarwar.com
 
 
-.....................................................................................
+
 #### Try to explore features of the application by using the below credentials
 
 + EmaiL: shop@mail.com
 + Pass: admin@shop1234
-.....................................................................................
+
 
 
 ### Features:
