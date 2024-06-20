@@ -5,6 +5,7 @@
 
 
 #### Try to explore features of the application by using the below credentials
+##### This is just for testing purpose, all data will be reset after 24h whatever you have added to the application.
 
 + EmaiL: shop@mail.com
 + Pass: admin@shop1234
