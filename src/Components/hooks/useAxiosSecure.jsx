@@ -3,7 +3,7 @@ import axios from "axios";
 
 
 const axiosSecure = axios.create({
-    baseURL: 'https://api.mozumdarhat.com',
+    baseURL: 'https://hardware-shop-server.vercel.app',
 });
 
 const useAxiosSecure = () => {

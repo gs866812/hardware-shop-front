@@ -199,7 +199,7 @@ const Provider = ({ children }) => {
       setLoading(false);
 
       if (currentUser) {
-        axios.post("https://api.mozumdarhat.com/jwt", email, { withCredentials: true })
+        axios.post("https://hardware-shop-server.vercel.app/jwt", email, { withCredentials: true })
           .then((res) => {
             // console.log(res.data);
           })
@@ -208,7 +208,7 @@ const Provider = ({ children }) => {
           });
       } else {
 
-        axios.post("https://api.mozumdarhat.com/logOut", email, { withCredentials: true })
+        axios.post("https://hardware-shop-server.vercel.app/logOut", email, { withCredentials: true })
           .then((res) => {
             // console.log(res.data);
           })

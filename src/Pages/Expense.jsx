@@ -192,7 +192,7 @@ const Expense = () => {
 
         <div className="w-full bg">
           <div className="flex flex-col gap-3 justify-center border px-3 py-6 shadow-lg text-center rounded-md bg-yellow-500 text-white">
-            <h2 className="text-2xl font-bold">BDT: {parseFloat(profit[0]?.profitBalance).toFixed(2) || 0}</h2>
+            <h2 className="text-2xl font-bold">BDT: {parseFloat(profit[0]?.profitBalance) || 0 .toFixed(2)}</h2>
             <p>Total Profit</p>
           </div>
         </div>

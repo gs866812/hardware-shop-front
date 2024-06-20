@@ -5,7 +5,7 @@ import { ContextData } from '../../Provider';
 import { toast } from 'react-toastify';
 
 const axiosProtect = axios.create({
-    baseURL: 'https://api.mozumdarhat.com',
+    baseURL: 'https://hardware-shop-server.vercel.app',
     withCredentials: true
 });
 
