@@ -1,0 +1,46 @@
+/* Customize scrollbar */
+.sidebar::-webkit-scrollbar {
+    width: 2px; /* Width of the scrollbar */
+    
+  }
+  
+  /* Handle on hover */
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    
+  }
+  
+  /* Handle */
+  .sidebar::-webkit-scrollbar-thumb {
+    background: #888; 
+    border-radius: 5px;
+  }
+  
+  /* Track */
+  .sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+  }
+  
+  /* Handle when dragged */
+  .sidebar::-webkit-scrollbar-thumb:active {
+    background: #555; 
+  }
+  
+
+
+  nav a.active{
+    color: white;
+    background-color: #151515;
+  }
+
+  .poppins {
+    font-family: "Poppins", sans-serif;
+  }
+
+.L-border{
+  border: 1px solid red;
+}
+
+th, td, tr{
+  border: 1px solid grey;
+}
