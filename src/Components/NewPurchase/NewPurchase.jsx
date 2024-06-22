@@ -262,9 +262,9 @@ const NewPurchase = () => {
     const finalPayAmount = parseFloat(parseFloat(payAmount).toFixed(2));
     const balance = mainBalance[0].mainBalance;
 
-    if (finalPayAmount > balance) {
-      return toast.error("Insufficient balance");
-    }
+    // if (finalPayAmount > balance) {
+    //   return toast.error("Insufficient balance");
+    // }
 
     const purchaseInvoiceInfo = {
       userName,

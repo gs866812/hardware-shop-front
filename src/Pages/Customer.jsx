@@ -20,6 +20,7 @@ const Customer = () => {
     setCurrentPage,
     itemsPerPage,
     setItemsPerPage,
+    setSearchCustomer
   } = useContext(ContextData);
 
  

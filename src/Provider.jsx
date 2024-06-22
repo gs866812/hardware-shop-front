@@ -50,8 +50,7 @@ const Provider = ({ children }) => {
 
 
   let userName;
-  user?.email === "asad4design@gmail.com"? userName = 'ASAD1010' : 
-  user?.email === "mozumdarhattraders@gmail.com"? userName = 'ARIF2020' : null;
+  user?.email === "shop@mail.com"? userName = 'USER001' : null;
 
       // get customer
       useEffect(() => {
@@ -106,7 +105,7 @@ const Provider = ({ children }) => {
   // get products
   useEffect(() => {
     axiosSecure
-      .get(`/products`, {withCredentials: true} ,{
+      .get(`/products`, {
         params: {
           userEmail: user?.email,
           page: currentPage,
@@ -258,7 +257,9 @@ const Provider = ({ children }) => {
     setMainBalance,
     searchStock,
     setStock,
-    setCount
+    setCount,
+    setSearchCustomer,
+    setSearchSupplier
   };
 
   return <ContextData.Provider value={info}>{children}</ContextData.Provider>;
