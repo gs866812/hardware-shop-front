@@ -7,6 +7,7 @@ import useAxiosSecure from "../Components/hooks/useAxiosSecure";
 import useAxiosProtect from "../Components/hooks/useAxiosProtect";
 
 const Expense = () => {
+  const mail = localStorage.getItem('userEmail');
   const axiosSecure = useAxiosSecure();
   const axiosProtect = useAxiosProtect();
   const [costingBalance, setCostingBalance] = useState([]);
@@ -29,7 +30,7 @@ const Expense = () => {
     axiosProtect
       .get("/costingBalance", {
         params: {
-		        userEmail: user?.email,
+		        userEmail: mail,
         },
       })
       .then((res) => {
@@ -51,7 +52,7 @@ const Expense = () => {
   useEffect(()=> {
     axiosProtect.get('/profitBalance' , {
       params: {
-        userEmail: user?.email,
+        userEmail: mail,
       },
     })
     .then((res) => {
@@ -68,7 +69,7 @@ const Expense = () => {
     axiosProtect
       .get(`/allTransactions`, {
         params: {
-          userEmail: user?.email,
+          userEmail: mail,
           page: currentPage,
           size: itemsPerPage,
           search: searchTerm,
@@ -164,7 +165,7 @@ const Expense = () => {
   useEffect(() => {
     axiosProtect.get("/mainBalance", {
       params: {
-        userEmail: user?.email,
+        userEmail: mail,
       },
     })
     .then((res) => {

@@ -7,6 +7,7 @@ import { IoEyeOutline } from 'react-icons/io5';
 import useAxiosProtect from '../hooks/useAxiosProtect';
 
 const Quotation = () => {
+  const mail = localStorage.getItem('userEmail');
     const axiosSecure = useAxiosSecure();
     const axiosProtect = useAxiosProtect();
     const {reFetch, productCount, user} = useContext(ContextData);
@@ -19,7 +20,7 @@ const Quotation = () => {
     useEffect(()=> {
       axiosProtect.get('/quotationInvoice', {
           params: {
-            userEmail: user?.email,
+            userEmail: mail,
             page: currentPage,
             size: itemsPerPage,
             search: searchTerm,

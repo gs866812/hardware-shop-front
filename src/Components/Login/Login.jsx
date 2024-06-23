@@ -31,6 +31,7 @@ const Login = () => {
         // Signed in
         navigate(from, { replace: true });
         const user = result.user;
+        localStorage.setItem('userEmail', user?.email);
         setUser(user);
         Swal.fire({
           title: "Login successfully",

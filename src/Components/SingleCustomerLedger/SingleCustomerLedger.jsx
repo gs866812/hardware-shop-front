@@ -9,6 +9,7 @@ import useAxiosProtect from "../hooks/useAxiosProtect";
 import { IoEyeOutline } from "react-icons/io5";
 
 const SingleCustomerLedger = () => {
+  const mail = localStorage.getItem('userEmail');
   const [singleCustomer, setSingleCustomer] = useState([]);
   const axiosSecure = useAxiosSecure();
   const axiosProtect = useAxiosProtect();
@@ -38,7 +39,7 @@ const SingleCustomerLedger = () => {
   const fetchCustomerData = async () => {
     const response = await axiosProtect.get(`/singleCustomer/${id}`, {
       params: {
-        userEmail: user?.email,
+        userEmail: mail,
         searchTerm,
         page: currentPage,
         limit: itemsPerPage,

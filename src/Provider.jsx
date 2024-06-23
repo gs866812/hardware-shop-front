@@ -16,7 +16,7 @@ export const ContextData = createContext(null);
 
 const Provider = ({ children }) => {
   const axiosSecure = useAxiosSecure();
-  
+  const mail = localStorage.getItem('userEmail');
   
 
 
@@ -81,6 +81,7 @@ const Provider = ({ children }) => {
   // Logout
   const logOut = () => {
     setLoading(true);
+    localStorage.removeItem('userEmail');
     return signOut(auth);
   };
 
@@ -107,7 +108,7 @@ const Provider = ({ children }) => {
     axiosSecure
       .get(`/products`, {
         params: {
-          userEmail: user?.email,
+          userEmail: mail,
           page: currentPage,
           size: itemsPerPage,
           search: searchTerm,
@@ -163,7 +164,7 @@ const Provider = ({ children }) => {
     axiosSecure
       .get(`/suppliers`, {
         params: {
-          userEmail: user?.email,
+          userEmail: mail,
           page: currentPage,
           size: itemsPerPage,
           search: searchSupplier,

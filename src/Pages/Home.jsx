@@ -11,12 +11,11 @@ import logout from "../assets/images/logout.png";
 import { Link } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { ContextData } from "../Provider";
-import useAxiosSecure from "../Components/hooks/useAxiosSecure";
 import { toast } from "react-toastify";
 import useAxiosProtect from "../Components/hooks/useAxiosProtect";
 
 const Home = () => {
-  const axiosSecure = useAxiosSecure();
+  const mail = localStorage.getItem('userEmail');
   const axiosProtect = useAxiosProtect();
   const {mainBalance, stock, logOut, reFetch, setMainBalance, currentPage, itemsPerPage, searchStock, user, setCount, setStock} = useContext(ContextData);
 
@@ -36,7 +35,7 @@ const Home = () => {
     useEffect(()=> {
       axiosProtect.get('/supplierTotalDueBalance', {
         params: {
-		      userEmail: user?.email,
+		      userEmail: mail,
         },
       })
       .then(res => {
@@ -49,7 +48,7 @@ const Home = () => {
     useEffect(()=> {
       axiosProtect.get('/customerTotalDueBalance', {
         params: {
-		userEmail: user?.email,
+		userEmail: mail,
         },
       })
       .then(res => {
@@ -63,7 +62,7 @@ const Home = () => {
   useEffect(() => {
     axiosProtect.get("/mainBalance", {
       params: {
-        userEmail: user?.email,
+        userEmail: mail,
       },
     })
     .then((res) => {
@@ -77,7 +76,7 @@ const Home = () => {
     axiosProtect
       .get(`/stockBalance`, {
         params: {
-          userEmail: user?.email,
+          userEmail: mail,
           page: currentPage,
           size: itemsPerPage,
           search: searchStock,

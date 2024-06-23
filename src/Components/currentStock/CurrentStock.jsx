@@ -4,6 +4,7 @@ import { ContextData } from "../../Provider";
 import useAxiosProtect from "../hooks/useAxiosProtect";
 
 const CurrentStock = () => {
+  const mail = localStorage.getItem('userEmail');
   const axiosProtect = useAxiosProtect();
   const {
     user,
@@ -25,7 +26,7 @@ const CurrentStock = () => {
     axiosProtect
       .get(`/stockBalance`, {
         params: {
-          userEmail: user?.email,
+          userEmail: mail,
           page: currentPage,
           size: itemsPerPage,
           search: searchStock,
