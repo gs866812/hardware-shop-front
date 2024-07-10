@@ -7,10 +7,9 @@ import { IoEyeOutline } from 'react-icons/io5';
 import useAxiosProtect from '../hooks/useAxiosProtect';
 
 const Quotation = () => {
-  const mail = localStorage.getItem('userEmail');
     const axiosSecure = useAxiosSecure();
     const axiosProtect = useAxiosProtect();
-    const {reFetch, productCount, user} = useContext(ContextData);
+    const {reFetch, productCount,  user} = useContext(ContextData);
     const [invoice, setInvoice] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [count, setCount] = useState({});
@@ -20,7 +19,7 @@ const Quotation = () => {
     useEffect(()=> {
       axiosProtect.get('/quotationInvoice', {
           params: {
-            userEmail: mail,
+            userEmail: user?.email,
             page: currentPage,
             size: itemsPerPage,
             search: searchTerm,
@@ -115,6 +114,14 @@ const handlePageClick = (page) => {
       setSearchTerm(event.target.value);
       setCurrentPage(1); // reset to first page on new search
     };
+
+// View quotation
+
+    const viewInvoice = (id) => {
+      window.open(`/quotation/${id}`,'_blank');
+
+    };
+
     return (
         <div>
         <div className="flex gap-5 justify-between">
@@ -167,7 +174,7 @@ const handlePageClick = (page) => {
                     <td>{invoice.contactNumber}</td>
                     <td>{parseFloat(invoice.grandTotal).toFixed(2)}</td>
                     <td>{invoice.userName}</td>
-                    <td className="text-center w-[8%]"> <IoEyeOutline className="text-xl cursor-pointer"/></td>
+                    <td className="text-center w-[8%]"> <IoEyeOutline onClick={()=> viewInvoice(invoice._id)} className="text-xl cursor-pointer"/></td>
   
                 </tr>
                   )

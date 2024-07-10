@@ -22,11 +22,14 @@ import PdfInvoice from "./Components/PdfMaker/PdfInvoice";
 import PurchaseInvoice from "./Components/PdfMaker/PurchaseInvoice";
 import DeviceRestriction from "./Pages/DeviceRestriction";
 import NotFound from "./Pages/NotFound";
+import QuotationInvoice from "./Components/PdfMaker/QuotationInvoice";
+import TradeReturn from "./Components/Return/TradeReturn";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   { path: "/salesInvoice/:invoiceNumber", element: <PdfInvoice /> },
   { path: "/purchaseInvoice/:invoiceNumber", element: <PurchaseInvoice /> },
+  { path: "/quotation/:id", element: <QuotationInvoice /> },
   {
     path: "/",
     element: (
@@ -53,6 +56,7 @@ export const router = createBrowserRouter([
       { path: "/customerLedger", element: <CustomerLedger /> },
       { path: "/supplierLedger/id/:_id", element: <SingleSupplierLedger /> },
       { path: "/customerLedger/id/:_id", element: <SingleCustomerLedger /> },
+      { path: "/return", element: <TradeReturn /> },
     ],
   },
 ]);

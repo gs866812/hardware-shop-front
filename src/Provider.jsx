@@ -9,22 +9,17 @@ import {
 import auth from "./firebase.config";
 import axios from "axios";
 
-
-
 export const ContextData = createContext(null);
-
 
 const Provider = ({ children }) => {
   const axiosSecure = useAxiosSecure();
-  const mail = localStorage.getItem('userEmail');
-  
-
 
   const [reFetch, setReFetch] = useState(false);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [units, setUnits] = useState([]);
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [supplier, setSupplier] = useState([]);
   const [customer, setCustomer] = useState([]);
@@ -44,151 +39,116 @@ const Provider = ({ children }) => {
   const [searchStock, setSearchStock] = useState("");
   const [searchCustomer, setSearchCustomer] = useState("");
 
-
-
- 
-
-
   let userName;
-  user?.email === "shop@mail.com"? userName = 'USER001' : null;
+  user?.email === "asad4design@gmail.com" ? (userName = "ASAD1010") :
+  user?.email === "mozumdarhattraders@gmail.com" ? (userName = "ARIF2020") :
+  user?.email === "shop@mail.com" ? (userName = "DEMO") : null;
 
-      // get customer
-      useEffect(() => {
-        axiosSecure
-          .get(`/customers`, {
-            params: {
-              page: currentPage,
-              size: itemsPerPage,
-              search: searchCustomer,
-            },
-          })
-          .then((data) => {
-            setCustomer(data.data.result);
-            setCustomerCount(data.data.count);
-          })
-          .catch((err) => {
-            toast("Error fetching data", err);
-          });
-      }, [reFetch, currentPage, itemsPerPage, searchCustomer, axiosSecure]);
+  useEffect(() => {
+    axiosSecure.get("/customers", {
+      params: {
+        page: currentPage,
+        size: itemsPerPage,
+        search: searchCustomer,
+      },
+    }).then((data) => {
+      setCustomer(data.data.result);
+      setCustomerCount(data.data.count);
+    }).catch((err) => {
+      toast("Error fetching data", err);
+    });
+  }, [reFetch, currentPage, itemsPerPage, searchCustomer, axiosSecure]);
 
-
-  // email login
   const loginWithEmail = (email, password) => {
     setLoading(true);
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  // Logout
   const logOut = () => {
     setLoading(true);
-    localStorage.removeItem('userEmail');
     return signOut(auth);
   };
 
-
- 
-
-  // get categories
   useEffect(() => {
     axiosSecure.get("/categories").then((data) => setCategories(data.data));
   }, [reFetch]);
 
-  // get brands
   useEffect(() => {
     axiosSecure.get("/brands").then((data) => setBrands(data.data));
   }, [reFetch]);
 
-  // get units
   useEffect(() => {
     axiosSecure.get("/units").then((data) => setUnits(data.data));
   }, [reFetch]);
 
-  // get products
+
+  // get all products
   useEffect(() => {
-    axiosSecure
-      .get(`/products`, {
-        params: {
-          userEmail: mail,
-          page: currentPage,
-          size: itemsPerPage,
-          search: searchTerm,
-        },
-      })
-      .then((data) => {
-        setProducts(data.data.products);
-        setProductCount(data.data.count);
-        setLoading(false);
-      });
+    axiosSecure.get("/products")
+    .then((data) => setAllProducts(data.data.products));
+  },[reFetch])
+
+  useEffect(() => {
+    axiosSecure.get("/products", {
+      params: {
+        userEmail: user?.email,
+        page: currentPage,
+        size: itemsPerPage,
+        search: searchTerm,
+      },
+    }).then((data) => {
+      setProducts(data.data.products);
+      setProductCount(data.data.count);
+      setLoading(false);
+    });
   }, [reFetch, currentPage, itemsPerPage, searchTerm, axiosSecure]);
 
-  
-
-  // total stock count
   useEffect(() => {
-    axiosSecure
-      .get("/stockCount")
-      .then((res) => {
-        setCount(res.data.count);
-      })
-      .catch((err) => {
-        toast.error("Server error", err);
-      });
+    axiosSecure.get("/stockCount").then((res) => {
+      setCount(res.data.count);
+    }).catch((err) => {
+      toast.error("Server error", err);
+    });
   }, [reFetch]);
 
-  // total customer count
   useEffect(() => {
-    axiosSecure
-      .get("/customerCount")
-      .then((res) => {
-        setCustomerCount(res.data.count);
-      })
-      .catch((err) => {
-        toast.error("Server error", err);
-      });
+    axiosSecure.get("/customerCount").then((res) => {
+      setCustomerCount(res.data.count);
+    }).catch((err) => {
+      toast.error("Server error", err);
+    });
   }, [reFetch]);
 
-  // total product count
   useEffect(() => {
-    axiosSecure
-      .get("/productTotalCount")
-      .then((res) => {
-        setProductCount(res.data.count);
-      })
-      .catch((err) => {
-        toast.error("Server error", err);
-      });
+    axiosSecure.get("/productTotalCount").then((res) => {
+      setProductCount(res.data.count);
+    }).catch((err) => {
+      toast.error("Server error", err);
+    });
   }, [reFetch]);
 
-  // get supplier
   useEffect(() => {
-    axiosSecure
-      .get(`/suppliers`, {
-        params: {
-          userEmail: mail,
-          page: currentPage,
-          size: itemsPerPage,
-          search: searchSupplier,
-        },
-      })
-      .then((data) => {
-        setSupplier(data.data.result);
-        setSupplierCount(data.data.count);
-      })
-      .catch((err) => {
-        toast("Error fetching data", err);
-      });
+    axiosSecure.get("/suppliers", {
+      params: {
+        userEmail: user?.email,
+        page: currentPage,
+        size: itemsPerPage,
+        search: searchSupplier,
+      },
+    }).then((data) => {
+      setSupplier(data.data.result);
+      setSupplierCount(data.data.count);
+    }).catch((err) => {
+      toast("Error fetching data", err);
+    });
   }, [reFetch, currentPage, itemsPerPage, searchSupplier, axiosSecure]);
 
-  // total supplier count
   useEffect(() => {
-    axiosSecure
-      .get("/supplierTotalCount")
-      .then((res) => {
-        setSupplierCount(res.data.count);
-      })
-      .catch((err) => {
-        toast.error("Server error", err);
-      });
+    axiosSecure.get("/supplierTotalCount").then((res) => {
+      setSupplierCount(res.data.count);
+    }).catch((err) => {
+      toast.error("Server error", err);
+    });
   }, [reFetch]);
 
   useEffect(() => {
@@ -199,26 +159,27 @@ const Provider = ({ children }) => {
       setLoading(false);
 
       if (currentUser) {
-        axios.post("https://hardware-shop-server.vercel.app/jwt", email, { withCredentials: true })
+        axios.post('https://hardware-shop-server.vercel.app/jwt', email, { withCredentials: true })
           .then((res) => {
-            // console.log(res.data);
+            // console.log('User logged in:', currentUser);
           })
           .catch((err) => {
-            toast.error(err);
+            toast.error(err.message);
           });
       } else {
-
-        axios.post("https://hardware-shop-server.vercel.app/logOut", email, { withCredentials: true })
+        axios.post('https://hardware-shop-server.vercel.app/logOut', {}, { withCredentials: true })
           .then((res) => {
-            // console.log(res.data);
+            if (res.data.success) {
+              setUser(null);
+              // console.log('User logged out');
+            }
           })
           .catch((err) => {
-            toast.error(err);
+            toast.error(err.message);
           });
       }
+    });
 
-     
-  });
     return () => {
       unSubscribe();
     };
@@ -234,6 +195,7 @@ const Provider = ({ children }) => {
     brands,
     units,
     products,
+    allProducts,
     loading,
     setReFetch,
     reFetch,
@@ -260,7 +222,7 @@ const Provider = ({ children }) => {
     setStock,
     setCount,
     setSearchCustomer,
-    setSearchSupplier
+    setSearchSupplier,
   };
 
   return <ContextData.Provider value={info}>{children}</ContextData.Provider>;

@@ -8,7 +8,6 @@ import { ContextData } from "../../Provider";
 import useAxiosProtect from "../hooks/useAxiosProtect";
 
 const SupplierLedger = () => {
-  const mail = localStorage.getItem('userEmail');
   const axiosSecure = useAxiosSecure();
   const axiosProtect = useAxiosProtect();
   const { reFetch, setReFetch, user } = useContext(ContextData);
@@ -24,7 +23,7 @@ const SupplierLedger = () => {
   useEffect(()=> {
     axiosProtect.get(`/supplierLedger`, {
       params: {
-        userEmail: mail,
+        userEmail: user?.email,
         page: currentPage,
         size: itemsPerPage,
         search: searchTerm,

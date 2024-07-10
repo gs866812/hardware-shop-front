@@ -8,7 +8,6 @@ import useAxiosProtect from "../Components/hooks/useAxiosProtect";
 
 
 const Sales = () => {
-  const mail = localStorage.getItem('userEmail');
     const axiosSecure = useAxiosSecure();
     const axiosProtect = useAxiosProtect();
 
@@ -24,7 +23,7 @@ const Sales = () => {
     useEffect(()=> {
       axiosProtect.get('/salesInvoices', {
           params: {
-            userEmail: mail,
+            userEmail: user?.email,
             page: currentPage,
             size: itemsPerPage,
             search: searchTerm,

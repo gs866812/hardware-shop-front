@@ -37,7 +37,7 @@ const AddCustomer = () => {
   const handleAddCustomer = (e) => {
     e.preventDefault();
     if (contactNumberValue.length < 11) {
-      toast.error("Invalid contact number");
+      return toast.error("Invalid contact number");
     }
     const form = e.target;
     const customerName = form.customer_name.value;

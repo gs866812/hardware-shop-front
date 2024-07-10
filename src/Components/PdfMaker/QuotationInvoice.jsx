@@ -3,9 +3,10 @@ import useAxiosProtect from "../hooks/useAxiosProtect";
 import { ContextData } from "../../Provider";
 import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
+import logo from "../../assets/images/logo_red.png";
 
 
-const PurchaseInvoice = () => {
+const QuotationInvoice = () => {
   const { user } = useContext(ContextData);
   const axiosProtect = useAxiosProtect();
   const [invoice, setInvoice] = useState({});
@@ -13,15 +14,15 @@ const PurchaseInvoice = () => {
   const location = useLocation();
   const pathParts = location.pathname.split("/");
   const id = pathParts[pathParts.length - 1]; // Get the last part of the pathname
-  const NID = parseInt(id);
+
 
   useEffect(() => {
-    if (user && NID) {
+    if (user && id) {
       axiosProtect
-        .get("/generatePurchaseInvoice", {
+        .get("/generateQuotationInvoice", {
           params: {
             userEmail: user.email,
-            invoiceNumber: NID,
+            ID: id,
           },
         })
         .then((res) => {
@@ -31,11 +32,17 @@ const PurchaseInvoice = () => {
           toast.error("Server error", err);
         });
     }
-  }, [user, NID, axiosProtect]);
+  }, [user, id, axiosProtect]);
 
   const handlePrint = () => {
+    const printSection = document.getElementById("printSection");
+    printSection.classList.remove("hidden");
+    printSection.classList.add("flex");
     window.print();
-
+    window.onafterprint = () => {
+      printSection.classList.add("hidden");
+      printSection.classList.remove("flex");
+    };
   };
 
   return (
@@ -57,9 +64,27 @@ const PurchaseInvoice = () => {
           </button>
         </div>
 
+        {/* Upper part of invoice */}
+        <div
+          className="hidden justify-between items-center gap-5 pb-5 border-b mb-10"
+          id="printSection"
+        >
+          <div className="w-1/2">
+            <img
+              src={logo}
+              alt=""
+              className="stroke-2 stroke-slate-600 w-[80%]"
+            />
+          </div>
+          <div className="w-1/2">
+            <p>Shop Address:</p>
+            <p>Mozumdarhat, Sundarganj, Gaibandha</p>
+            <p>Mobile: 01795616264, 01767201923</p>
+          </div>
+        </div>
 
-        <h2>Purchase Invoice</h2>
-        <p>INV - {invoice.invoiceNumber}</p>
+        <h2>Customer Quotation</h2>
+        <p>INV - </p>
 
         <table
           className="mt-3"
@@ -70,18 +95,18 @@ const PurchaseInvoice = () => {
         >
           <tbody>
             <tr>
-              <td>Supplier:</td>
-              <td className="w-[20%]">Invoice number</td>
-              <td className="w-[18%]">{invoice.invoiceNumber}</td>
+              <td>Bill to:</td>
+              <td className="w-[20%]">Quotation no.</td>
+              <td className="w-[18%] text-center">{invoice.quotationNumber}</td>
             </tr>
             <tr>
               <td rowSpan={2}>
-                <p>{invoice.supplierName}</p>
-                <p>{invoice.supplierAddress}</p>
-                <p>{invoice.supplierContact}</p>
+                <p>{invoice.customerName}</p>
+                <p>{invoice.customerAddress}</p>
+                <p>{invoice.contactNumber}</p>
               </td>
-              <td>Invoice date</td>
-              <td>{invoice.date}</td>
+              <td>Quotation date</td>
+              <td className="text-center">{invoice.date}</td>
             </tr>
             <tr>
               <td>Delivery date</td>
@@ -102,7 +127,7 @@ const PurchaseInvoice = () => {
         >
           <thead>
             <tr>
-              <th>ID</th>
+              <th className="w-[15%]">ID</th>
               <th>Product Name</th>
               <th className="w-[8%]">QTY</th>
               <th className="w-[10%]">Unit</th>
@@ -116,11 +141,11 @@ const PurchaseInvoice = () => {
                 <tr key={product.productID}>
                   <td className="text-center">{product.productID}</td>
                   <td>{product.productTitle}</td>
-                  <td className="text-center">{product.purchaseQuantity}</td>
-                  <td className="text-center">{product.purchaseUnit}</td>
-                  <td className="text-center">{product.purchasePrice}</td>
+                  <td className="text-center">{product.salesQuantity}</td>
+                  <td className="text-center">{product.salesUnit}</td>
+                  <td className="text-center">{product.salesPrice}</td>
                   <td className="text-right">
-                    {(product.purchaseQuantity * product.purchasePrice).toFixed(2)}
+                    {(product.salesQuantity * product.salesPrice).toFixed(2)}
                   </td>
                 </tr>
               ))}
@@ -161,17 +186,13 @@ const PurchaseInvoice = () => {
             <tr>
               <td>Paid Amount</td>
               <td className="text-right">
-                {parseFloat(invoice.finalPayAmount).toFixed(2)}
+                -
               </td>
             </tr>
             <tr>
-              <td>{invoice.refund >= 0?
-              'Refund after deductions' : 'Due Amount'
-              }</td>
+              <td>Due Amount</td>
               <td className="text-right">
-              {invoice.refund >= 0?
-                `${parseFloat(invoice.refund) || 0 .toFixed(2)}` : `${parseFloat(invoice.dueAmount) || 0 .toFixed(2)}`
-                }
+                -
               </td>
             </tr>
           </tbody>
@@ -191,4 +212,4 @@ const PurchaseInvoice = () => {
   );
 };
 
-export default PurchaseInvoice;
+export default QuotationInvoice;

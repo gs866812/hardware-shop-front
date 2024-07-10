@@ -1,7 +1,7 @@
 import { CiSearch } from "react-icons/ci";
 import AddCustomer from "../Components/AddCustomer/AddCustomer";
-import { MdDelete, MdOutlineEdit } from "react-icons/md";
-import { useContext, useEffect, useState } from "react";
+import { MdOutlineEdit } from "react-icons/md";
+import { useContext, useEffect } from "react";
 import { ContextData } from "../Provider";
 import { toast } from "react-toastify";
 import useAxiosSecure from "../Components/hooks/useAxiosSecure";
@@ -22,6 +22,20 @@ const Customer = () => {
     setItemsPerPage,
     setSearchCustomer
   } = useContext(ContextData);
+
+      // __________________________________________________________________________
+      useEffect(() => {
+        // Reset search term and current page on component mount
+        setSearchCustomer("");
+        setCurrentPage(1);
+    
+        return () => {
+          // Cleanup function to reset search term and current page on component unmount
+          setSearchCustomer("");
+          setCurrentPage(1);
+        };
+      }, [setSearchCustomer, setCurrentPage]);
+      // __________________________________________________________________________
 
  
 

@@ -9,7 +9,6 @@ import useAxiosProtect from "../hooks/useAxiosProtect";
 import { IoEyeOutline } from "react-icons/io5";
 
 const SingleCustomerLedger = () => {
-  const mail = localStorage.getItem('userEmail');
   const [singleCustomer, setSingleCustomer] = useState([]);
   const axiosSecure = useAxiosSecure();
   const axiosProtect = useAxiosProtect();
@@ -39,7 +38,7 @@ const SingleCustomerLedger = () => {
   const fetchCustomerData = async () => {
     const response = await axiosProtect.get(`/singleCustomer/${id}`, {
       params: {
-        userEmail: mail,
+        userEmail: user?.email,
         searchTerm,
         page: currentPage,
         limit: itemsPerPage,
@@ -168,7 +167,7 @@ const SingleCustomerLedger = () => {
 
   return (
     <div>
-      <h2 className="text-2xl mt-5">Customer Ledger Details</h2>
+      <h2 className="text-2xl my-5 pl-2">Customer Ledger Details:</h2>
       <div className="flex gap-2 p-2">
         <div className="w-1/2">
           <div className="overflow-x-auto">
@@ -197,10 +196,10 @@ const SingleCustomerLedger = () => {
                   <td className="!p-0">
                     {singleCustomer.dueAmount > 0?
                       <button onClick={() => document.getElementById("payDue").showModal()} 
-                      className="w-full py-3 text-center bg-green-500 text-white">PAY</button>
+                      className="w-full py-3 text-center bg-green-500 text-white">Received</button>
                       :
                       <button onClick={() => document.getElementById("payDue").showModal()} 
-                      className="w-full py-3 text-center bg-gray-500 text-white" disabled>PAY</button>
+                      className="w-full py-3 text-center bg-gray-500 text-white" disabled>Received</button>
                     }
                   
                   </td>
@@ -214,7 +213,7 @@ const SingleCustomerLedger = () => {
                     }
                     className="w-10 text-center bg-blue-500 text-white cursor-pointer"
                   >
-                    Payment History
+                    History
                   </td>
                 </tr>
               </tbody>
@@ -373,7 +372,7 @@ const SingleCustomerLedger = () => {
 
       <div>
         <dialog id="paymentHistory" className="modal">
-          <div className="modal-box">
+          <div className="modal-box w-2/4 max-w-5xl">
             <h3 className="font-bold text-lg mb-3 uppercase">
               Payment history:
             </h3>
@@ -400,7 +399,7 @@ const SingleCustomerLedger = () => {
                   {/* row 1 */}
                   {singleCustomer.paymentHistory &&
                     Array.isArray(singleCustomer.paymentHistory) &&
-                    singleCustomer.paymentHistory.map((payment, i) => (
+                    singleCustomer.paymentHistory.slice().reverse().map((payment, i) => (
                       <tr key={i}>
                         <td>{payment.date}</td>
                         <td>{payment.payNote}</td>

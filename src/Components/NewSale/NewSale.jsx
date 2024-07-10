@@ -6,11 +6,22 @@ import useAxiosSecure from "../hooks/useAxiosSecure";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
+import Select from "react-select";
 
 const NewSale = () => {
-  const { products, customer, setReFetch, reFetch, userName, setItemsPerPage, customerCount } = useContext(ContextData);
+  const {
+    user,
+    allProducts,
+    customer,
+    setReFetch,
+    reFetch,
+    userName,
+    setItemsPerPage,
+    customerCount,
+  } = useContext(ContextData);
   const axiosSecure = useAxiosSecure();
 
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const [brand, setBrand] = useState("");
@@ -43,40 +54,46 @@ const NewSale = () => {
     }
   };
 
+  const productOptions = allProducts.map((product) => ({
+    value: product.productCode,
+    label: `${product.productCode}-${product.productName}`,
+  }));
+
+
+
+
+
   //   change the unit name if product changed
-  const handleProductChange = (event) => {
-    const selectedIndex = event.target.selectedIndex;
-    const form = event.target;
-    const productID = form.value.slice(0, 8);
+  const handleProductChange = (selectedOption) => {
+    if (selectedOption) {
+      const selectedProduct = allProducts.find(
+        (product) => product.productCode === selectedOption.value
+      );
+      setSelectedProduct(selectedProduct);
 
-    axiosSecure
-      .post(`/getSalesPrice/${productID}`)
-      .then((res) => {
-        if (res.data.salesPrice) {
-          setSalesPrice(res.data.salesPrice);
-          setAvailable(null);
-          setPurchasePrice(res.data.purchasePrice);
-        }else {
-          setAvailable("Stock not available");
-          return toast.error("Stock not available");
-        }
-         
-      })
-      .catch((err) => {
-        toast.error("Error fetching data", err);
-      });
+      setUnit(selectedProduct?.unitName);
+      setBrand(selectedProduct?.brandName);
+      setCategory(selectedProduct?.categoryName);
 
-    if (selectedIndex > 0) {
-      const selectedProduct = products[selectedIndex - 1];
-      setSelectedCustomer(selectedProduct);
-
-      // Set the unit of the selected product
-      setUnit(selectedProduct.unitName);
-      setBrand(selectedProduct.brandName);
-      setCategory(selectedProduct.categoryName);
+      axiosSecure
+        .post(`/getSalesPrice/${selectedOption.value}`)
+        .then((res) => {
+          if (res.data.salesPrice) {
+            setSalesPrice(res.data.salesPrice);
+            setAvailable(null);
+            setPurchasePrice(res.data.purchasePrice);
+          } else {
+            setAvailable("Stock not available");
+            toast.error(res.data);
+          }
+        })
+        .catch((err) => {
+          toast.error("Error fetching data", err);
+        });
     } else {
-      setSelectedCustomer(null);
+      setSelectedProduct(null);
       setUnit("");
+      setBrand("");
       setCategory("");
     }
   };
@@ -84,17 +101,18 @@ const NewSale = () => {
   const handleSalesProduct = (e) => {
     e.preventDefault();
     if (
-      document.getElementById("selected_product").value === "Select product"
+      !selectedProduct
     ) {
       return toast.error("Select product");
     }
 
     const form = e.target;
-    const productID = form.selected_product.value.slice(0, 8);
-    const productTitle = form.selected_product.value.slice(9);
+    const productID = selectedProduct.productCode;
+    const productTitle = selectedProduct.productName;
     const salesQuantity = parseInt(form.purchase_quantity.value);
     const salesUnit = unit;
     const salesPrice = parseFloat(form.sales_price.value);
+    const userMail = user?.email;
 
     const salesProductInfo = {
       productID,
@@ -105,8 +123,8 @@ const NewSale = () => {
       salesPrice,
       purchasePrice,
       category,
+      userMail
     };
-
 
     axiosSecure
       .post(`/adTempSalesProductList`, salesProductInfo)
@@ -131,7 +149,7 @@ const NewSale = () => {
 
   useEffect(() => {
     axiosSecure
-      .get("/tempSalesProductList")
+      .get(`/tempSalesProductList/${user?.email}`)
       .then((data) => {
         setTempProductList(data.data);
       })
@@ -146,28 +164,23 @@ const NewSale = () => {
       )
     : [];
 
- 
-
-
   let salesAmount = 0;
   for (let i = 0; i < salesProductListAmount.length; i++) {
     salesAmount += salesProductListAmount[i];
   }
 
   const salesProfitProductListAmount = Array.isArray(tempProductList)
-  ? tempProductList.map(
-      (product) => product.salesQuantity * product.purchasePrice
-    )
-  : [];
-
+    ? tempProductList.map(
+        (product) => product.salesQuantity * product.purchasePrice
+      )
+    : [];
 
   let salesProfitAmount = 0;
   for (let i = 0; i < salesProfitProductListAmount.length; i++) {
     salesProfitAmount += salesProfitProductListAmount[i];
   }
 
-const profit = parseFloat(salesAmount - salesProfitAmount);
-
+  const profit = parseFloat(salesAmount - salesProfitAmount);
 
   let salesInvoiceAmount = parseFloat(salesAmount).toFixed(2);
   useEffect(() => {
@@ -204,11 +217,19 @@ const profit = parseFloat(salesAmount - salesProfitAmount);
     document.getElementById("sales_step_2").classList.add("hidden");
   };
 
-  const handleCustomerChange = (event) => {
-    const selectedIndex = event.target.selectedIndex;
+  const customerOptions = customer.map((customer) => ({
+    value: customer.contactNumber,
+    label: customer.customerName,
+  }));
 
-    if (selectedIndex > 0) {
-      const selectedCustomer = customer[selectedIndex - 1];
+
+  const handleCustomerChange = (selectedOption) => {
+
+    const selectedCustomer = customer.find(
+      (customer) => customer.contactNumber === selectedOption?.value
+    );
+
+    if (selectedCustomer) {
       setSelectedCustomer(selectedCustomer);
 
       // Set the unit of the selected product
@@ -227,9 +248,7 @@ const profit = parseFloat(salesAmount - salesProfitAmount);
     }
     const discountNumber = parseInt(document.getElementById("discount").value);
     if (discountNumber) {
-      const discountAmount = parseFloat(
-        (salesInvoiceAmount * discountNumber) / 100
-      );
+      const discountAmount = parseFloat( discountNumber);
       const newGrandTotal = parseFloat(
         salesInvoiceAmount - discountAmount
       ).toFixed(2);
@@ -258,8 +277,11 @@ const profit = parseFloat(salesAmount - salesProfitAmount);
 
   const handleProceed = (e) => {
     e.preventDefault();
+    if (!selectedCustomer) {
+      return toast.error("Select customer");
+    }
     const date = moment(new Date()).format("DD.MM.YYYY");
-    const customerName = e.target.customer_name.value;
+    const customerName = selectedCustomer.customerName;
     let totalAmount = parseFloat(
       parseFloat(e.target.total_amount.value).toFixed(2)
     );
@@ -273,14 +295,13 @@ const profit = parseFloat(salesAmount - salesProfitAmount);
       parseFloat(e.target.due_amount.value).toFixed(2)
     );
 
-    if (customerName === "Select customer") {
-      return toast.error("Select customer");
-    }
+    
     const finalPayAmount = parseFloat(parseFloat(payAmount).toFixed(2));
 
     if (finalPayAmount > grandTotal) {
       return toast.error("Payment exceeded");
     }
+    const userMail = user?.email;
 
     const salesInvoiceInfo = {
       customerSerial,
@@ -292,7 +313,8 @@ const profit = parseFloat(salesAmount - salesProfitAmount);
       finalPayAmount,
       dueAmount,
       profit,
-      userName
+      userName,
+      userMail
     };
     axiosSecure
       .post("/newSalesInvoice", salesInvoiceInfo)
@@ -333,27 +355,20 @@ const profit = parseFloat(salesAmount - salesProfitAmount);
       </div>
       {/* ........................................... */}
 
-      <div>
+      <div className="border py-10 px-5 mt-5">
         <form
           onSubmit={handleSalesProduct}
           className="flex flex-col gap-3"
           id="add_product"
         >
           <label className="flex gap-2 items-center flex-wrap">
-            <select
-              className="border p-2 rounded-md outline-none flex-grow"
+            <Select
+              options={productOptions}
               onChange={handleProductChange}
-              id="selected_product"
-            >
-              <option>Select product</option>
-
-              {Array.isArray(products) &&
-                products.map((product) => (
-                  <option key={product._id}>
-                    {product.productCode}-{product.productName}
-                  </option>
-                ))}
-            </select>
+              placeholder="Search and select a product"
+              isClearable
+              className="flex-grow"
+            />
 
             <input
               onChange={handleInputSalesQuantity}
@@ -364,6 +379,16 @@ const profit = parseFloat(salesAmount - salesProfitAmount);
               className="border p-2 rounded-md outline-none"
               size={5}
               required
+            />
+
+            <input
+              type="text"
+              name="unit"
+              defaultValue={unit}
+              placeholder="Unit"
+              readOnly
+              className="border p-2 rounded-md outline-none"
+              size={5}
             />
 
             <input
@@ -406,6 +431,7 @@ const profit = parseFloat(salesAmount - salesProfitAmount);
                   <td>Product ID</td>
                   <td>Product Name</td>
                   <td>QTY</td>
+                  <td>Unit</td>
                   <td>Price</td>
                   <td>Amount</td>
                   <td className="text-center">Action</td>
@@ -420,6 +446,7 @@ const profit = parseFloat(salesAmount - salesProfitAmount);
                       <td className="w-[10%]">{product.productID}</td>
                       <td>{product.productTitle}</td>
                       <td className="w-[10%]">{product.salesQuantity}</td>
+                      <td className="w-[10%]">{product.salesUnit}</td>
                       <td className="w-[10%]">{product.salesPrice}</td>
                       <td className="w-[10%]">
                         {(product.salesPrice * product.salesQuantity).toFixed(
@@ -458,21 +485,14 @@ const profit = parseFloat(salesAmount - salesProfitAmount);
         >
           <form onSubmit={handleProceed}>
             <label className="flex gap-2 items-center justify-between">
-              <span className="flex gap-5 items-center">
-                Select customer:
-                <select
-                  id="customer_name"
-                  className="border py-1 px-2 rounded-md outline-none"
-                  onChange={handleCustomerChange}
-                >
-                  <option>Select customer</option>
-                  {Array.isArray(customer) &&
-                    customer.map((customer) => (
-                      <option key={customer._id}>
-                        {customer.customerName}
-                      </option>
-                    ))}
-                </select>
+              <span className="flex gap-5 items-center w-[40%]">
+                <Select
+                options={customerOptions}
+                onChange={handleCustomerChange}
+                placeholder="Search and select a customer"
+                isClearable
+                className="flex-grow"
+              />
               </span>
 
               <span className="flex gap-5 items-center">

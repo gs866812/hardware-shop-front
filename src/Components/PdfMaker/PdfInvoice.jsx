@@ -96,7 +96,7 @@ const PdfInvoice = () => {
             <tr>
               <td>Bill to:</td>
               <td className="w-[20%]">Invoice number</td>
-              <td className="w-[18%]">{invoice.invoiceNumber}</td>
+              <td className="w-[18%] text-center">{invoice.invoiceNumber}</td>
             </tr>
             <tr>
               <td rowSpan={2}>
@@ -105,7 +105,7 @@ const PdfInvoice = () => {
                 <p>{invoice.customerMobile}</p>
               </td>
               <td>Invoice date</td>
-              <td>{invoice.date}</td>
+              <td className="text-center">{invoice.date}</td>
             </tr>
             <tr>
               <td>Delivery date</td>
@@ -126,11 +126,12 @@ const PdfInvoice = () => {
         >
           <thead>
             <tr>
-              <th>ID</th>
+              <th className="w-[12%]">ID</th>
               <th>Product Name</th>
-              <th className="w-[10%]">QTY</th>
-              <th className="w-[10%]">Rate</th>
-              <th className="w-[18%]">Amount</th>
+              <th className="w-[8%]">QTY</th>
+              <th className="w-[10%]">Unit</th>
+              <th className="w-[8%]">Rate</th>
+              <th className="w-[12%]">Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -140,6 +141,7 @@ const PdfInvoice = () => {
                   <td className="text-center">{product.productID}</td>
                   <td>{product.productTitle}</td>
                   <td className="text-center">{product.salesQuantity}</td>
+                  <td className="text-center">{product.salesUnit}</td>
                   <td className="text-center">{product.salesPrice}</td>
                   <td className="text-right">
                     {(product.salesQuantity * product.salesPrice).toFixed(2)}
@@ -187,9 +189,13 @@ const PdfInvoice = () => {
               </td>
             </tr>
             <tr>
-              <td>Due Amount</td>
+              <td>{invoice.refund >= 0?
+              'Refund after deductions' : 'Due Amount'
+              }</td>
               <td className="text-right">
-                {parseFloat(invoice.dueAmount).toFixed(2) || 0}
+                {invoice.refund >= 0?
+                `${parseFloat(invoice.refund) || 0 .toFixed(2)}` : `${parseFloat(invoice.dueAmount) || 0 .toFixed(2)}`
+                }
               </td>
             </tr>
           </tbody>

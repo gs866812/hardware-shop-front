@@ -9,7 +9,6 @@ import useAxiosSecure from "../Components/hooks/useAxiosSecure";
 import useAxiosProtect from "../Components/hooks/useAxiosProtect";
 
 const Purchase = () => {
-  const mail = localStorage.getItem('userEmail');
   const axiosSecure = useAxiosSecure();
   const axiosProtect = useAxiosProtect();
   const {reFetch, productCount, setItemsPerPage, user} = useContext(ContextData);
@@ -23,7 +22,7 @@ const Purchase = () => {
   useEffect(()=> {
     axiosProtect.get('/invoices' , {
       params: {
-        userEmail: mail,
+        userEmail: user?.email,
         page: currentPage,
         size: itemsPerPage,
         search: searchTerm,

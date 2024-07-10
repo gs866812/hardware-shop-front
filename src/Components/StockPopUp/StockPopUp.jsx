@@ -1,10 +1,50 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { FcWorkflow } from "react-icons/fc";
 import { ContextData } from "../../Provider";
 import { CiSearch } from "react-icons/ci";
+import useAxiosProtect from "../hooks/useAxiosProtect";
+import { toast } from "react-toastify";
 
 const StockPopUp = () => {
-    const {stock, setSearchStock, setCurrentPage} = useContext(ContextData);
+  const axiosProtect = useAxiosProtect();
+    const {stock, setSearchStock, setCurrentPage, user, currentPage, itemsPerPage,
+      searchStock, setCount, setStock, reFetch
+     } = useContext(ContextData);
+
+         // __________________________________________________________________________
+    useEffect(() => {
+      // Reset search term and current page on component mount
+      setSearchStock("");
+      setCurrentPage(1);
+  
+      return () => {
+        // Cleanup function to reset search term and current page on component unmount
+        setSearchStock("");
+        setCurrentPage(1);
+      };
+    }, [setSearchStock, setCurrentPage]);
+    // __________________________________________________________________________
+
+     // get stock balance
+  useEffect(() => {
+    axiosProtect
+      .get(`/stockBalance`, {
+        params: {
+          userEmail: user?.email,
+          page: currentPage,
+          size: itemsPerPage,
+          search: searchStock,
+        },
+      })
+      .then((res) => {
+        setStock(res.data.result);
+        setCount(res.data.count);
+      })
+      .catch((err) => {
+        toast.error(err);
+      });
+  }, [reFetch, currentPage, itemsPerPage, searchStock]);
+
 
      // search input onchange
     const handleInputChange = (event) => {
@@ -62,7 +102,8 @@ const StockPopUp = () => {
                   <th>Unit</th>
                   <th>Category</th>
                   <th>Brand</th>
-                  <th>Sales Price/un</th>
+                  <th>Sales Price</th>
+                  <th>Storage</th>
                 </tr>
               </thead>
               <tbody>
@@ -72,11 +113,12 @@ const StockPopUp = () => {
                     <tr key={stock._id} className={`${stock.purchaseQuantity <= stock.reOrderQuantity? 'bg-yellow-100': ''}`}>
                       <td>{stock.productID}</td>
                       <td>{stock.productTitle}</td>
-                      <td>{stock.purchaseQuantity}</td>
+                      <td className="text-center">{parseFloat(stock.purchaseQuantity).toFixed(2)}</td>
                       <td>{stock.purchaseUnit}</td>
                       <td>{stock.category}</td>
                       <td>{stock.brand}</td>
-                      <td>BDT {stock.salesPrice}</td>
+                      <td className="text-center">{parseFloat(stock.salesPrice).toFixed(2)}</td>
+                      <td>{stock.storage}</td>
                     </tr>
                   ))}
               </tbody>

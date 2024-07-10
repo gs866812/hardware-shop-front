@@ -9,7 +9,6 @@ import useAxiosProtect from "../hooks/useAxiosProtect";
 import { IoEyeOutline } from "react-icons/io5";
 
 const SingleSupplierLedger = () => {
-  const mail = localStorage.getItem('userEmail');
   const axiosSecure = useAxiosSecure();
   const axiosProtect = useAxiosProtect();
 
@@ -29,7 +28,7 @@ const SingleSupplierLedger = () => {
     const fetchSupplierData = async () => {
       const response = await axiosProtect.get(`/singleSupplier/${id}`, {
         params: {
-          userEmail: mail,
+          userEmail: user?.email,
           searchTerm,
           page: currentPage,
           limit: itemsPerPage,
@@ -229,7 +228,7 @@ const SingleSupplierLedger = () => {
                     }
                     className="w-10 text-center bg-blue-500 text-white cursor-pointer"
                   >
-                    Payment History
+                    History
                   </td>
                 </tr>
               </tbody>
@@ -413,7 +412,7 @@ const SingleSupplierLedger = () => {
                   {/* row 1 */}
                   {singleSupplier.paymentHistory &&
                     Array.isArray(singleSupplier.paymentHistory) &&
-                    singleSupplier.paymentHistory.map((payment, i) => (
+                    singleSupplier.paymentHistory.slice().reverse().map((payment, i) => (
                       <tr key={i}>
                         <td>{payment.date}</td>
                         <td>{payment.payNote}</td>

@@ -7,11 +7,21 @@ import Swal from "sweetalert2";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import useAxiosSecure from "../hooks/useAxiosSecure";
+import Select from "react-select"; // Import react-select
 
 const NewPurchase = () => {
-  const { products, supplier, setReFetch, reFetch, mainBalance, userName, setItemsPerPage, supplierCount } =
-    useContext(ContextData);
-    const axiosSecure = useAxiosSecure();
+  const {
+    user,
+    allProducts,
+    supplier,
+    setReFetch,
+    reFetch,
+    mainBalance,
+    userName,
+    setItemsPerPage,
+    supplierCount,
+  } = useContext(ContextData);
+  const axiosSecure = useAxiosSecure();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState("");
@@ -60,43 +70,44 @@ const NewPurchase = () => {
     }
   };
 
-  //   change the unit name if product changed
-  const handleProductChange = (event) => {
-    const selectedIndex = event.target.selectedIndex;
+  // Transform products array into options array for react-select
+  const productOptions = allProducts.map((product) => ({
+    value: product.productCode,
+    label: `${product.productCode}-${product.productName}`,
+  }));
 
-    if (selectedIndex > 0) {
-      const selectedProduct = products[selectedIndex - 1];
-      setSelectedSupplier(selectedProduct);
-
-      // Set the unit of the selected product
-      setUnit(selectedProduct.unitName);
-      setBrand(selectedProduct.brandName);
-      setCategory(selectedProduct.categoryName);
-    } else {
-      setSelectedSupplier(null);
-      setUnit("");
-      setCategory("");
-    }
+  // Handle product change
+  const handleProductChange = (selectedOption) => {
+    const selectedProduct = allProducts.find(
+      (product) => product.productCode === selectedOption?.value
+    );
+    setSelectedProduct(selectedProduct);
+    setUnit(selectedProduct?.unitName);
+    setBrand(selectedProduct?.brandName);
+    setCategory(selectedProduct?.categoryName);
   };
 
   // add purchase product for temporary display
 
   const handlePurchaseProduct = (e) => {
     e.preventDefault();
-    if (
-      document.getElementById("selected_product").value === "Select product"
-    ) {
+    if (!selectedProduct) {
       return toast.error("Select product");
     }
+    const userMail = user?.email;
 
     const form = e.target;
-    const productID = form.selected_product.value.slice(0, 8);
-    const productTitle = form.selected_product.value.slice(9);
+    const productID = selectedProduct.productCode;
+    const productTitle = selectedProduct.productName;
     const purchaseQuantity = form.purchase_quantity.value;
     const purchaseUnit = unit;
     const purchasePrice = form.purchase_price.value;
     const salesPrice = form.sales_price.value;
     const reOrderQuantity = parseInt(normsQuantity);
+    const storageLocation = form.storage.value;
+    if(storageLocation === 'Storage'){
+      return toast.error("Select storage");
+    }
     const purchaseProductInfo = {
       productID,
       productTitle,
@@ -105,11 +116,14 @@ const NewPurchase = () => {
       purchaseUnit,
       purchasePrice,
       salesPrice,
+      storageLocation,
       reOrderQuantity,
-      category
+      category,
+      userMail
     };
 
-    axiosSecure.post(`/adTempPurchaseProductList`, purchaseProductInfo)
+    axiosSecure
+      .post(`/adTempPurchaseProductList`, purchaseProductInfo)
       .then((data) => {
         if (data.data.insertedId) {
           toast.success("Product added");
@@ -132,7 +146,8 @@ const NewPurchase = () => {
   // get purchase product temporarily list
 
   useEffect(() => {
-    axiosSecure.get("/tempPurchaseProductList")
+    axiosSecure
+      .get(`/tempPurchaseProductList/${user?.email}`)
       .then((data) => {
         setTempProductList(data.data);
       })
@@ -143,7 +158,8 @@ const NewPurchase = () => {
 
   // delete temp product
   const handleTempProduct = (_id) => {
-    axiosSecure.delete(`/deleteTempProduct/${_id}`)
+    axiosSecure
+      .delete(`/deleteTempProduct/${_id}`)
       .then((data) => {
         if (data.data.deletedCount === 1) {
           setReFetch(!reFetch);
@@ -170,7 +186,6 @@ const NewPurchase = () => {
     setGrandTotal(purchaseInvoiceAmount);
     setDueAmount(purchaseInvoiceAmount);
   }, [purchaseInvoiceAmount]);
-
 
   const handleDiscountOnchange = (event) => {
     const discountValue = event.target.value;
@@ -220,7 +235,6 @@ const NewPurchase = () => {
     document.getElementById("purchase_step_2").classList.add("hidden");
   };
 
-
   //   change the supplier name if supplier changed
   const handleSupplierChange = (event) => {
     const selectedIndex = event.target.selectedIndex;
@@ -231,7 +245,6 @@ const NewPurchase = () => {
 
       // Set the unit of the selected product
       setSupplierSerial(selectedSupplier.serial);
-
     } else {
       setSelectedSupplier(null);
       setSupplierSerial("");
@@ -239,6 +252,7 @@ const NewPurchase = () => {
   };
 
   const navigate = useNavigate();
+
   const handleProceed = (e) => {
     e.preventDefault();
     const date = moment(new Date()).format("DD.MM.YYYY");
@@ -260,11 +274,12 @@ const NewPurchase = () => {
       return toast.error("Select supplier");
     }
     const finalPayAmount = parseFloat(parseFloat(payAmount).toFixed(2));
-    const balance = mainBalance[0].mainBalance;
+    const balance = mainBalance[0]?.mainBalance || 0;
 
-    // if (finalPayAmount > balance) {
-    //   return toast.error("Insufficient balance");
-    // }
+    if (finalPayAmount > balance) {
+      return toast.error("Insufficient balance");
+    }
+    const userMail = user?.email;
 
     const purchaseInvoiceInfo = {
       userName,
@@ -276,8 +291,10 @@ const NewPurchase = () => {
       grandTotal,
       finalPayAmount,
       dueAmount,
+      userMail
     };
-    axiosSecure.post("/newPurchaseInvoice", purchaseInvoiceInfo)
+    axiosSecure
+      .post("/newPurchaseInvoice", purchaseInvoiceInfo)
       .then((data) => {
         if (data.data.insertedId) {
           setReFetch(!reFetch);
@@ -316,28 +333,23 @@ const NewPurchase = () => {
         </div>
       </div>
 
-      <div>
+      <div className="mt-5 border py-10 px-5">
         {/* new purchase form */}
         <form
           onSubmit={handlePurchaseProduct}
           className="flex flex-col gap-3"
           id="add_product"
         >
-          <label className="flex gap-2 items-center flex-wrap">
-            <select
-              className="border p-2 rounded-md outline-none flex-grow"
-              onChange={handleProductChange}
-              id="selected_product"
-            >
-              <option>Select product</option>
-
-              {products.map((product) => (
-                <option key={product._id}>
-                  {product.productCode}-
-                  {product.productName}
-                </option>
-              ))}
-            </select>
+          <label className="flex gap-5 items-center flex-wrap">
+            <div className="w-[58%]">
+              <Select
+                options={productOptions}
+                onChange={handleProductChange}
+                placeholder="Search and select a product"
+                isClearable
+                className="flex-grow"
+              />
+            </div>
 
             <input
               onChange={handleInputPurchaseQuantity}
@@ -351,6 +363,16 @@ const NewPurchase = () => {
             />
 
             <input
+              type="text"
+              name="purchase_unit"
+              defaultValue={unit}
+              readOnly
+              placeholder="Unit"
+              size={5}
+              className="border p-2 rounded-md outline-none"
+            />
+
+            <input
               onChange={handleInputPurchasePrice}
               type="text"
               name="purchase_price"
@@ -360,7 +382,8 @@ const NewPurchase = () => {
               required
               className="border p-2 rounded-md outline-none"
             />
-
+          </label>
+          <label className="flex gap-5 items-center flex-wrap mt-3">
             <input
               onChange={handleInputSalesPrice}
               type="text"
@@ -371,6 +394,13 @@ const NewPurchase = () => {
               required
               className="border p-2 rounded-md outline-none"
             />
+
+            <select name="storage" className="border p-2 rounded-md outline-none">
+              <option defaultValue='Storage'>Storage</option>
+              <option value="W-1">W-1</option>
+              <option value="W-2">W-2</option>
+              <option value="W-3">W-3</option>
+            </select>
 
             <input
               onChange={handleInputNormsQuantity}
@@ -384,7 +414,7 @@ const NewPurchase = () => {
             />
 
             <button className="bg-green-500 text-white py-2 px-3 rounded-md cursor-pointer">
-              Add
+              Add product
             </button>
           </label>
         </form>
@@ -407,6 +437,7 @@ const NewPurchase = () => {
                   <td>Product ID</td>
                   <td>Product Name</td>
                   <td>QTY</td>
+                  <td>Unit</td>
                   <td>Price</td>
                   <td>Amount</td>
                   <td className="text-center">Action</td>
@@ -421,6 +452,7 @@ const NewPurchase = () => {
                       <td className="w-[10%]">{product.productID}</td>
                       <td>{product.productTitle}</td>
                       <td className="w-[10%]">{product.purchaseQuantity}</td>
+                      <td className="w-[10%]">{product.purchaseUnit}</td>
                       <td className="w-[10%]">{product.purchasePrice}</td>
                       <td className="w-[10%]">
                         {(
@@ -457,7 +489,7 @@ const NewPurchase = () => {
           className="mt-5 border p-5 rounded-md mb-5 hidden"
           id="purchase_step_2"
         >
-          <form onSubmit={ handleProceed}>
+          <form onSubmit={handleProceed}>
             <label className="flex gap-2 items-center justify-between">
               <span className="flex gap-5 items-center">
                 Select supplier:
@@ -489,7 +521,7 @@ const NewPurchase = () => {
               </span>
 
               <span className="flex gap-5 items-center">
-                Discount:{" "}
+                Discount(%):{" "}
                 <input
                   id="discount"
                   type="text"

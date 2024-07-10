@@ -2,9 +2,16 @@ import { useContext, useEffect, useState } from "react";
 import { CiSearch } from "react-icons/ci";
 import { ContextData } from "../../Provider";
 import useAxiosProtect from "../hooks/useAxiosProtect";
+import excel from "../../assets/images/excel.png";
+import pdf from "../../assets/images/pdf.png";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { toast } from "react-toastify";
+
 
 const CurrentStock = () => {
-  const mail = localStorage.getItem('userEmail');
+  
   const axiosProtect = useAxiosProtect();
   const {
     user,
@@ -21,12 +28,43 @@ const CurrentStock = () => {
     reFetch
   } = useContext(ContextData);
 
+  const [downloadStock, setDownloadStock] = useState([]);
+
+  useEffect(() => {
+    axiosProtect
+      .get(`/stockBalance`, {
+        params: {
+          userEmail: user?.email,
+        },
+      })
+      .then((res) => {
+        setDownloadStock(res.data.result);
+      })
+      .catch((err) => {
+        toast.error(err);
+      });
+  }, [reFetch]);
+
+    // __________________________________________________________________________
+    useEffect(() => {
+      // Reset search term and current page on component mount
+      setSearchStock("");
+      setCurrentPage(1);
+  
+      return () => {
+        // Cleanup function to reset search term and current page on component unmount
+        setSearchStock("");
+        setCurrentPage(1);
+      };
+    }, [setSearchStock, setCurrentPage]);
+    // __________________________________________________________________________
+
   // get stock balance
   useEffect(() => {
     axiosProtect
       .get(`/stockBalance`, {
         params: {
-          userEmail: mail,
+          userEmail: user?.email,
           page: currentPage,
           size: itemsPerPage,
           search: searchStock,
@@ -37,7 +75,7 @@ const CurrentStock = () => {
         setCount(res.data.count);
       })
       .catch((err) => {
-        toast.error("Server error", err);
+        toast.error(err);
       });
   }, [reFetch, currentPage, itemsPerPage, searchStock]);
 
@@ -112,12 +150,81 @@ const CurrentStock = () => {
   };
 
   // ...................................................................
+  const downloadExcel = () => {
+    // Format the data to include only the desired columns
+    const formattedData = downloadStock.map((stk) => ({
+      "Product ID": stk.productID,
+      "Product Name": stk.productTitle,
+      Quantity: stk.purchaseQuantity,
+      "Norm's": stk.reOrderQuantity,
+      Price: stk.salesPrice,
+      Unit: stk.purchaseUnit,
+      Brand: stk.brand,
+      Category: stk.category,
+      Storage: stk.storage,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Stocks");
+    XLSX.writeFile(workbook, "stocks.xlsx");
+  };
+    // ...................................................................
+    const downloadPDF = () => {
+      const doc = new jsPDF();
+  
+      const tableColumn = [
+        "Product ID",
+        "Product Name",
+        "Quantity",
+        "Unit",
+        "Norm's",
+        "Price",
+      ];
+      const tableRows = [];
+  
+      downloadStock.forEach((stk) => {
+        const stockData = [
+          stk.productID,
+          stk.productTitle,
+          parseFloat(stk.purchaseQuantity).toFixed(2),
+          stk.purchaseUnit,
+          parseFloat(stk.reOrderQuantity).toFixed(2),
+          parseFloat(stk.salesPrice).toFixed(2),
+        ];
+        tableRows.push(stockData);
+      });
+  
+      doc.text("Stock Balance", 14, 15);
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 20,
+      });
+      doc.save("stocks.pdf");
+    };
+    // ...................................................................
 
   return (
     <div>
       <div className="mt-5 pb-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl">Current stock balance:</h2>
+          <div className="flex gap-2 items-center">
+            <h2 className="text-2xl">Current stock balance:</h2>
+            <img
+              src={excel}
+              alt="Excel"
+              className="w-[20px] h-[20%] cursor-pointer ml-5"
+              onClick={downloadExcel}
+            />
+            <img
+              src={pdf}
+              alt="Pdf"
+              className="w-[20px] h-[20%] cursor-pointer"
+              onClick={downloadPDF}
+            />
+
+          </div>
           <label className="flex gap-1 items-center border py-1 px-3 rounded-md">
             <input
               onChange={handleInputChange}
@@ -136,13 +243,14 @@ const CurrentStock = () => {
               {/* head */}
               <thead>
                 <tr className="border bg-green-200 text-black">
-                  <th>Product ID</th>
+                  <th className="w-[10%]">Product ID</th>
                   <th>Product name</th>
-                  <th>Quantity</th>
-                  <th>Unit</th>
-                  <th>Category</th>
-                  <th>Brand</th>
-                  <th>Sales Price/un</th>
+                  <th className="w-[6%]">Quantity</th>
+                  <th className="w-[8%]">Unit</th>
+                  <th className="w-[15%] text-center">Category</th>
+                  <th className="w-[8%]">Brand</th>
+                  <th className="w-[5%]">Sales Price</th>
+                  <th className="w-[6%]">Storage</th>
                 </tr>
               </thead>
               <tbody>
@@ -159,11 +267,12 @@ const CurrentStock = () => {
                     >
                       <td>{stock.productID}</td>
                       <td>{stock.productTitle}</td>
-                      <td>{stock.purchaseQuantity}</td>
+                      <td className="text-center">{parseFloat(stock.purchaseQuantity).toFixed(2)}</td>
                       <td>{stock.purchaseUnit}</td>
-                      <td>{stock.category}</td>
-                      <td>{stock.brand}</td>
-                      <td>BDT {stock.salesPrice}</td>
+                      <td className="text-center">{stock.category}</td>
+                      <td className="text-center">{stock.brand}</td>
+                      <td className="text-center">{parseFloat(stock.salesPrice).toFixed(2)}</td>
+                      <td className="text-center">{stock.storage}</td>
                     </tr>
                   ))}
               </tbody>

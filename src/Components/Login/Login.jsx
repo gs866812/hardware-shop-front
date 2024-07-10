@@ -31,7 +31,6 @@ const Login = () => {
         // Signed in
         navigate(from, { replace: true });
         const user = result.user;
-        localStorage.setItem('userEmail', user?.email);
         setUser(user);
         Swal.fire({
           title: "Login successfully",
@@ -53,7 +52,7 @@ const Login = () => {
   };
 
   return (
-    <div className="fanwood flex justify-center items-center lg:py-8 px-4">
+    <div className="fanwood flex justify-center items-center lg:py-8 px-4 bg-gray-700">
       <div className="flex flex-col bg-gray-700 lg:p-14 md:p-10 p-5 lg:w-1/2 md:w-2/3 gap-3 mx-auto max-w-screen-2xl lg:bg-opacity-90 shadow-md border rounded-md">
         <div><img src={logo} alt="" /></div>
         

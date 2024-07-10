@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../Components/hooks/useAxiosSecure";
 
-
 const Supplier = () => {
   const axiosSecure = useAxiosSecure();
 
@@ -22,8 +21,21 @@ const Supplier = () => {
     itemsPerPage,
     setItemsPerPage,
     setSearchSupplier,
-
   } = useContext(ContextData);
+
+  // __________________________________________________________________________
+  useEffect(() => {
+    // Reset search term and current page on component mount
+    setSearchSupplier("");
+    setCurrentPage(1);
+
+    return () => {
+      // Cleanup function to reset search term and current page on component unmount
+      setSearchSupplier("");
+      setCurrentPage(1);
+    };
+  }, [setSearchSupplier, setCurrentPage]);
+  // __________________________________________________________________________
 
   // search input onchange
   const handleInputChange = (event) => {
@@ -69,7 +81,6 @@ const Supplier = () => {
       });
   };
 
-
   // Pagination
   const totalItem = supplierCount;
   const numberOfPages = Math.ceil(totalItem / itemsPerPage);
@@ -89,25 +100,27 @@ const Supplier = () => {
         for (let i = 1; i <= maxPagesToShow; i++) {
           pageNumbers.push(i);
         }
-        pageNumbers.push('...', totalPages);
+        pageNumbers.push("...", totalPages);
       } else if (currentPage > totalPages - halfMaxPagesToShow) {
-        pageNumbers.push(1, '...');
+        pageNumbers.push(1, "...");
         for (let i = totalPages - maxPagesToShow + 1; i <= totalPages; i++) {
           pageNumbers.push(i);
         }
       } else {
-        pageNumbers.push(1, '...');
-        for (let i = currentPage - halfMaxPagesToShow; i <= currentPage + halfMaxPagesToShow; i++) {
+        pageNumbers.push(1, "...");
+        for (
+          let i = currentPage - halfMaxPagesToShow;
+          i <= currentPage + halfMaxPagesToShow;
+          i++
+        ) {
           pageNumbers.push(i);
         }
-        pageNumbers.push('...', totalPages);
+        pageNumbers.push("...", totalPages);
       }
     }
 
     return pageNumbers;
   };
-
-
 
   const handleItemsPerPage = (e) => {
     const val = parseInt(e.target.value);
@@ -133,7 +146,6 @@ const Supplier = () => {
   };
 
   // .................
-  
 
   return (
     <div>
@@ -320,11 +332,11 @@ const Supplier = () => {
           {renderPageNumbers().map((page, index) => (
             <button
               key={index}
-              onClick={() => typeof page === 'number' && handlePageClick(page)}
+              onClick={() => typeof page === "number" && handlePageClick(page)}
               className={`py-2 px-5 bg-green-500 text-white rounded-md hover:bg-gray-600 ${
                 currentPage === page ? "!bg-gray-600" : ""
               }`}
-              disabled={typeof page !== 'number'}
+              disabled={typeof page !== "number"}
             >
               {page}
             </button>
@@ -344,7 +356,6 @@ const Supplier = () => {
             id=""
             className="py-2 px-1 rounded-md bg-green-500 text-white outline-none"
           >
-
             <option value="20">20</option>
             <option value="50">50</option>
             <option value="100">100</option>
